@@ -1,0 +1,66 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-6 offset-md-3">
+      <div class="submit-form">
+        <h4>Add Vehicle</h4>
+        
+        <div *ngIf="errorMessage" class="alert alert-danger">
+          {{ errorMessage }}
+        </div>
+
+        <form #vehicleForm="ngForm" (ngSubmit)="save()">
+          <div class="form-group">
+            <label for="vin">VIN</label>
+            <input class="form-control" id="vin" required [(ngModel)]="vehicle.vin" name="vin" maxlength="17" />
+          </div>
+
+          <div class="form-group">
+            <label for="brand">Brand</label>
+            <select class="form-control" id="brand" required [(ngModel)]="vehicle.brandId" name="brand">
+              <option *ngFor="let brand of brands" [value]="brand.id">{{ brand.name }}</option>
+            </select>
+            <div *ngIf="vehicleForm.controls['brand']?.invalid && vehicleForm.submitted">
+              Please select a brand.
+            </div>            
+          </div>
+
+          <div class="form-group">
+            <label for="modelName">Model</label>
+            <input class="form-control" id="modelName" required [(ngModel)]="vehicle.modelName" name="modelName" maxlength="100" />
+            <div *ngIf="vehicleForm.controls['modelName']?.invalid && vehicleForm.submitted">
+              Please enter a model name.
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="licensePlateNumber">License Plate Number</label>
+            <input
+              class="form-control"
+              id="licensePlateNumber"
+              required
+              [(ngModel)]="vehicle.licensePlateNumber"
+              name="licensePlateNumber"
+              maxlength="20"
+            />
+            <div *ngIf="vehicleForm.controls['licensePlateNumber']?.invalid && vehicleForm.submitted">
+              Please enter a license plate number.
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="equipment">Equipment</label>
+            <select class="form-control" id="equipment" multiple [(ngModel)]="vehicle.equipmentIds" name="equipment">
+              <option *ngFor="let eq of equipment" [value]="eq.id">{{ eq.name }}</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <button type="submit" class="btn btn-primary mr-2" [disabled]="!vehicleForm.valid">Save</button>
+            <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
