@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { takeUntil, catchError } from 'rxjs/operators';
-import { of, Subject } from 'rxjs';
+import { forkJoin, of, Subject } from 'rxjs';
 import { BrandsService } from '../../services/brands.service';
 import { EquipmentService } from '../../services/equipment.service';
 import { VehicleFormModel } from '../../models/vehicle.model';
@@ -45,29 +45,19 @@ export class EditVehicleComponent implements OnInit, OnDestroy {
   }
 
   fetchData() {
-    this.brandsService
-      .getAll()
-      .pipe(
-        takeUntil(this.unsubscribe$),
-        catchError((error) => {
-          console.error('Error fetching brands:', error);
-          return of([]);
-        })
-      )
-      .subscribe((brands: Brand[]) => {
-        this.brands = brands;
-      });
+    const brands$ = this.brandsService.getAll();
+    const equipment$ = this.equipmentService.getAll();
 
-    this.equipmentService
-      .getAll()
+    forkJoin([brands$, equipment$])
       .pipe(
         takeUntil(this.unsubscribe$),
-        catchError((error) => {
-          console.error('Error fetching equipment:', error);
+        catchError(() => {
+          this.errorMessage = 'Error fetching brands or equipment. Please try again.';
           return of([]);
         })
       )
-      .subscribe((equipment: Equipment[]) => {
+      .subscribe(([brands, equipment]) => {
+        this.brands = brands;
         this.equipment = equipment;
       });
 
@@ -76,16 +66,18 @@ export class EditVehicleComponent implements OnInit, OnDestroy {
       next: (existingVehicle: VehicleFormModel) => {
         this.vehicle = existingVehicle;
       },
-      error: (e) => console.error(e),
+      error: () => {
+        this.errorMessage = 'An error occurred while fetching the vehicle. Please try again.';
+      }
     });
   }
 
   save(): void {
     this.vehiclesService.update(this.vehicle.vin, this.vehicle).subscribe({
-      next: (res) => {
+      next: () => {
         this.router.navigate(['/vehicles']);
       },
-      error: (err) => {
+      error: () => {
         this.errorMessage = 'An error occurred while saving the vehicle. Please try again.';
       }
     });

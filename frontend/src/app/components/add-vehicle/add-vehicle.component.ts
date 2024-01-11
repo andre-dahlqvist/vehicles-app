@@ -46,12 +46,12 @@ export class AddVehicleComponent implements OnInit, OnDestroy {
   fetchData() {
     const brands$ = this.brandsService.getAll();
     const equipment$ = this.equipmentService.getAll();
-  
+
     forkJoin([brands$, equipment$])
       .pipe(
         takeUntil(this.unsubscribe$),
         catchError((error) => {
-          console.error('Error fetching brands or equipment:', error);
+          this.errorMessage = 'Error fetching brands or equipment. Please try again.';
           return of([]);
         })
       )
